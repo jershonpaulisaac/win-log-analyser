@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Windows Log Analyzer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: black;
+    }
+    h1 {
+      color: white;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
+    button:hover {
+      background-color: black;
+      color: white;
+    }
+    #results {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      background: rgb(0, 0, 0);
+      color: white;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      overflow-y: auto;
+    }
+    select {
+      padding: 8px 12px;
+      font-size: 16px;
+      margin-right: 10px;
+      border-radius: 6px;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>🔍 Windows Log Analyzer</h1><br>
+
+  <label for="filter" style="color:white; font-family: Verdana, Geneva, Tahoma, sans-serif;">
+    Filter by Alert Type:
+  </label>
+  <select id="filter">
+    <option value="All">All</option>
+    <option value="Failed Login">Failed Login</option>
+    <option value="Successful Login">Successful Login</option>
+    <option value="User Creation">User Creation</option>
+    <option value="Privilege Use">Privilege Use</option>
+    <option value="Group Membership Change">Group Membership Change</option>
+    <option value="User Deletion">User Deletion</option>
+    <option value="Local Group Member Added">Local Group Member Added</option>
+    <option value="Local Group Member Removed">Local Group Member Removed</option>
+    <option value="Account Lockout">Account Lockout</option>
+    <option value="Account Changed">Account Changed</option>
+    <option value="Code Integrity Violation">Code Integrity Violation</option>
+    <option value="Network Share Access">Network Share Access</option>
+    <option value="Credential Theft Attempt">Credential Theft Attempt</option>
+  </select>
+
+  <button onclick="scanLogs()" id="button">Scan Logs</button>
+  
+  <div id="results">Click the button to scan logs.</div>
+
+  <script>
+    function scanLogs() {
+      const filter = document.getElementById("filter").value;
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.textContent = "Scanning logs...";
+      fetch("/scan")
+        .then(response => response.json())
+        .then(data => {
+          let alerts = data.alerts;
+
+          if (filter !== "All") {
+            alerts = alerts.filter(alert => alert.includes(filter));
+          }
+
+          if (alerts.length === 0) {
+            resultsDiv.textContent = "✅ No suspicious log events found for the selected filter.";
+          } else {
+            resultsDiv.textContent = alerts.join('\n\n');
+          }
+        })
+        .catch(error => {
+          resultsDiv.textContent = "❌ Error scanning logs.";
+          console.error(error);
+        });
+    }
+  </script>
+</body>
+</html>
